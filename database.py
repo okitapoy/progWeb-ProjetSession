@@ -16,3 +16,17 @@ class Database:
     def disconnect(self):
         if self.connection is not None:
             self.connection.close()
+
+
+    def get_liste_complete(self):
+        cursor = self.get_connection().cursor()
+        cursor.execute("select * from contrevenants")
+        contrevenants = [dict(row) for row in cursor.fetchall()]
+        return contrevenants
+
+
+    def add_contrevenant(self,proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant):
+        connection = self.get_connection()
+        connection.execute(("insert into contrevenants(proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant)"
+                            "values(?,?,?,?,?,?,?,?,?)"),(proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant))
+        connection.commit()
