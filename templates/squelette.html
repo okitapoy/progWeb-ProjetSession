@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    {% block header %}
+        <meta charset="utf-8" />
+        <title>{% block titre %}{% endblock %}</title>
+        <link rel="stylesheet" type="text/css"  href="{{ url_for('static', filename='style.css') }}"/>
+    {% endblock %}
+    </head>
+
+    <body>
+        <div class ="topnav">
+          <a href="/">ACCUEIL</a>
+
+          <!--
+          <a href="/admin">ADMIN</a>
+          {% block admin %}{% endblock %}
+
+          <div class="search-container">
+            <form class="search"  action="/texte">
+              <input type="text" id="le_texte" name="le_texte" placeholder="Chercher..">
+              <button type="submit">Soumettre</button>
+            </form>
+          </div>
+
+          -->  
+        </div>
+
+
+        <div class="corps">
+          {% block corps %}
+           {% block formulaire %}{% endblock %}
+
+          {% endblock %}
+        </div>
+
+        {% block footer %}
+        <footer></footer>
+        {% endblock %}
+    </body>
+</html>
