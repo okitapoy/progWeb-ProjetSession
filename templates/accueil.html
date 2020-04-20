@@ -4,4 +4,47 @@
 
 {% block corps %}
 <h1> PAGE ACCUEIL TEST</h1>
+
+<div class="rechercheAcceuil">
+  <form class="search-container" action="/recherche">
+     <input type="text" id="proprietaire" name="proprietaire" placeholder="proprietaire..">
+     <input type="text" id="etablissement" name="etablissement" placeholder="etablissement..">
+     <input type="text" id="rue" name="rue" placeholder="rue..">
+     <button type="submit">Chercher</>
+  </form>
+</div>
+
+{% block page_resulat_recherche %}{% endblock %}
+
+<div class="listeAcceuil">
+  <table>
+    <tr>
+      <th>Propriétaire</th>
+      <th>Catégorie</th>
+      <th>Etablissement</th>
+      <th>Adresse</th>
+      <th>Ville</th>
+      <th>Date de l'infraction</th>
+      <th>Date du jugement</th>
+      <th>Montant de l'amende </th>
+      <th>Description de l'infraction</th>
+    </tr>
+
+{% for contrevenant in liste_contrevenants %}
+    <tr>
+      <td>{{contrevenant['proprietaire']}}</td>
+      <td>{{contrevenant['categorie']}}</td>
+      <td>{{contrevenant['etablissement']}}</td>
+      <td>{{contrevenant['adresse']}}</td>
+      <td>{{contrevenant['ville']}}</td>
+      <td>{{contrevenant['date_infraction']}}</td>
+      <td>{{contrevenant['date_jugement']}}</td>
+      <td>{{contrevenant['montant']}}</td>
+      <td>{{contrevenant['description']}}</td>
+    </tr>
+{% endfor %}
+  </table>
+</div>
+
+
 {% endblock %}
