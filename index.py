@@ -196,6 +196,7 @@ def api_contrevenants():
                 #return render_template('rechercheRes.html',liste_contrevenants=liste_entre_date) #temporair -------
                 return(liste_entre_date_json)
             else:
+                return(jsonify(liste_entre_date))
                 print("aucune infraction trouvee")
         else:
             print("DATE INVALIDE!!!!!")
