@@ -8,7 +8,9 @@ create table contrevenants (
   description text,
   date_infraction varchar,
   date_jugement varchar,
-  montant integer
+  montant integer,
+  date_iso_infraction text,
+  date_iso_jugement text
 );
 
 

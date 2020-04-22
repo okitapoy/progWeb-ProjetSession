@@ -3,20 +3,37 @@
 {% block titre%}Page d'accueil{% endblock %}
 
 {% block corps %}
+<p id="demo"></p>
 <h1> PAGE ACCUEIL TEST</h1>
 
 <div class="rechercheAcceuil">
+  <p>Chercher des infractions par critères.</p>
+  <p>Entrez les critère recherchés.</p>
   <form class="search-container" action="/recherche">
      <input type="text" id="proprietaire" name="proprietaire" placeholder="proprietaire..">
      <input type="text" id="etablissement" name="etablissement" placeholder="etablissement..">
      <input type="text" id="rue" name="rue" placeholder="rue..">
-     <button type="submit">Chercher</>
+     <button type="submit">Chercher</button>
   </form>
 </div>
 
-{% block page_resulat_recherche %}{% endblock %}
+{% block recherche_rapide %}
+<div class="rechercheRapide">
+  <p>Chercher des infractions par période.</p>
+  <p>Entrez la date du début et la date de fin de la période voulue.
+  <form action="#" id="form_date" onsubmit=" return recherche_date()">
+     <input type="text" id="date_debut" name="du" placeholder="AAAA-MM-JJ..">
+     <input type="text" id="date_fin" name="au" placeholder="AAAA-MM-JJ..">
+     <input type="submit" value="Chercher">
 
-<div class="listeAcceuil">
+  </form>
+</div>
+{% endblock %}
+
+{% block page_resulat_recherche %}
+{% endblock %}
+
+<div class="listeAcceuil" id="block_resultat">
   <table>
     <tr>
       <th>Propriétaire</th>
@@ -28,6 +45,8 @@
       <th>Date du jugement</th>
       <th>Montant de l'amende </th>
       <th>Description de l'infraction</th>
+      <th>iso_infraction</th>
+      <th>iso_jugement</th>
     </tr>
 
 {% for contrevenant in liste_contrevenants %}
@@ -41,6 +60,8 @@
       <td>{{contrevenant['date_jugement']}}</td>
       <td>{{contrevenant['montant']}}</td>
       <td>{{contrevenant['description']}}</td>
+      <td>{{contrevenant['date_iso_infraction']}}</td>
+      <td>{{contrevenant['date_iso_jugement']}}</td>
     </tr>
 {% endfor %}
   </table>

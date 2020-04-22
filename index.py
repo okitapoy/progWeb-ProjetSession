@@ -9,6 +9,7 @@ from flask import request
 from flask import redirect
 from flask import Response
 from flask import url_for
+from flask import jsonify
 from .database import Database
 #import uuid
 import datetime
@@ -28,10 +29,11 @@ import datetime
 
 URL = "http://donnees.ville.montreal.qc.ca/dataset/a5c1f0b9-261f-4247-99d8-f28da5000688/resource/92719d9b-8bf2-4dfd-b8e0-1021ffcaee2f/download/inspection-aliments-contrevenants.xml"
 req = Request(URL)
+donnee_a_jours = False
 
 mois = {
     "janvier": "01",
-    "féverier": "02",
+    "février": "02",
     "mars": "03",
     "avril": "04",
     "mai": "05",
@@ -83,10 +85,12 @@ def get_site_data():
     else:
         print("c bonnnnnn")
         data_xml = str(response.read().decode('latin-1'))
-        #print(data_xml)
+
+        #tt = str(data_xml.encode('utf-8','strict'))
+        print(data_xml)
 
         root = get_xml_root(data_xml)
-        #print(root.tag)
+
         mettre_a_jours_bd(root,get_db())
 
 
@@ -101,7 +105,7 @@ def mettre_a_jours_bd(root,db):
     for child in root:
         db.add_contrevenant(root[index][0].text,root[index][1].text,root[index][2].text,
         root[index][3].text,root[index][4].text,root[index][5].text,root[index][6].text,
-        root[index][7].text,root[index][8].text)
+        root[index][7].text,root[index][8].text,iso_convert(root[index][6].text),iso_convert(root[index][7].text))
         index += 1
 
 def valider_date(la_date):
@@ -117,9 +121,11 @@ def valider_date(la_date):
 def iso_convert(laDate):
     liste = laDate.split()
     trait = "-"
-    iso_date = liste[2]+trait+mois[liste[1]]+trait+liste[0]
-    print(iso_date)
-    print(valider_date(iso_date))
+    return liste[2]+trait+mois[liste[1]]+trait+liste[0]
+    #print(iso_date)
+    #print(valider_date(iso_date))
+
+
 
 
 
@@ -143,11 +149,8 @@ def close_connection(exception):
 
 @app.route('/')
 def page_acceuil():
-    get_site_data();
-    #root = get_xml_root("test.xml")
+    #get_site_data();
     db = get_db()
-
-    #mettre_a_jours_bd(root,db)
 
     liste_complete = db.get_liste_complete()
     #for row in list_complete:
@@ -180,19 +183,25 @@ def api_contrevenants():
     if 'du' in request.args and "au" in request.args:
         date_depart = str(request.args['du'])
         date_fin =  str(request.args['au'])
-        print(date_depart)
+
 
         if(valider_date(date_depart) is 1 and valider_date(date_fin) is 1):
-            print("DATE EST VALIDE")
-            t = "1 décembre 2020"
-            iso_convert(t)
+            liste_entre_date = db.infraction_entre_date(date_depart,date_fin)
 
 
+            if(len(liste_entre_date) != 0):
+                liste_entre_date_json = jsonify(liste_entre_date)
+                print(liste_entre_date_json)
+
+                #return render_template('rechercheRes.html',liste_contrevenants=liste_entre_date) #temporair -------
+                return(liste_entre_date_json)
+            else:
+                print("aucune infraction trouvee")
         else:
             print("DATE INVALIDE!!!!!")
 
     else:
-        print("argument du et au manquants!!!!!!")
+        print("argument du et au manquants!!!!!")
 
 
     return("fin api")

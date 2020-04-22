@@ -4,7 +4,7 @@
     {% block header %}
         <meta charset="utf-8" />
         <title>{% block titre %}{% endblock %}</title>
-        <script type="text/javascript"  src="{{ url_for('static', filename='script.js') }}"></script>
+      
         <link rel="stylesheet" type="text/css"  href="{{ url_for('static', filename='style.css') }}"/>
     {% endblock %}
     </head>
@@ -39,4 +39,8 @@
         <footer></footer>
         {% endblock %}
     </body>
+
+    <script type="text/javascript"  src="{{ url_for('static', filename='script.js') }}"></script>
+
+
 </html>

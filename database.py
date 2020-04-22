@@ -26,10 +26,10 @@ class Database:
         return contrevenants
 
 
-    def add_contrevenant(self,proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant):
+    def add_contrevenant(self,proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant,iso_infraction,iso_jugement):
         connection = self.get_connection()
-        connection.execute(("insert into contrevenants(proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant)"
-                            "values(?,?,?,?,?,?,?,?,?)"),(proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant))
+        connection.execute(("insert into contrevenants(proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant,date_iso_infraction,date_iso_jugement)"
+                            "values(?,?,?,?,?,?,?,?,?,?,?)"),(proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant,iso_infraction,iso_jugement))
         connection.commit()
 
 
@@ -69,3 +69,12 @@ class Database:
         cursor.execute("select * from contrevenants where etablissement = ? collate nocase or proprietaire = ? collate nocase", (etablissement,proprietaire,))
         res_rue = [dict(row) for row in cursor.fetchall()]
         return res_rue
+
+
+
+    def infraction_entre_date(self,depart,fin):
+        cursor = self.get_connection().cursor()
+        cursor.execute("select * from contrevenants where date_iso_infraction >= date(?) and date_iso_infraction <= date(?)"
+                        " order by datetime(date_iso_infraction)",(depart,fin,))
+        liste = [dict(row) for row in cursor.fetchall()]
+        return liste
