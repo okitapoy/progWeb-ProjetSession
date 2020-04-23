@@ -201,8 +201,23 @@ def api_contrevenants():
         else:
             print("DATE INVALIDE!!!!!")
 
+    elif len(request.args) is 0:
+        print("ZEROOOOOO   argument passe liste complete")
+        infractions_liste_complete = jsonify(db.get_liste_complete())
+
+        return(infractions_liste_complete)
+
+    elif 'contrevenant' in request.args and len(request.args) is 1:
+        print("argument un contrevenant!!!!!")
+
+        etablissement = str(request.args['contrevenant'])
+        liste_infractions_etablissement  = jsonify(db.chercher_etablissement(etablissement))
+
+        return (liste_infractions_etablissement)
+
+
     else:
-        print("argument du et au manquants!!!!!")
+        print("argument non pris en charge!!!!!")
 
 
     return("fin api")
