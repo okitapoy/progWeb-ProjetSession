@@ -1,0 +1,52 @@
+#%RAML 1.0
+
+title: documentation du service REST du travail de session
+baseUri: http://localhost:5000/api
+version: 1
+mediaType: application/json
+
+types:
+  contrevenantExistant:
+    properties:
+      proprietaire: string
+      categorie: string
+      etablissement: string
+      adresse: string
+      ville: string
+      description: string
+      date_infraction: string
+      date_jugement: string
+      montant: integer
+
+
+/api:
+  /contrevenants:
+    get:
+      description: Retourne la liste des contreventions émise entre deux dates.
+      queryParameters:
+        du:
+          description: Une chaine de caractère representant un date valide en format ISO 8601.
+          type: string
+          required: true
+          example: 2020-02-15
+        au:
+          description: Une chaine de caractère representant un date valide en format ISO 8601.
+          type: string
+          required: true
+          example: 2020-02-15
+      responses:
+        200:
+          body:
+            application/json:
+              type: contrevenantExistant[]
+    /contrevenant:
+      /{etablissement}:
+        get:
+          description: Retourne la liste de toutes les contreventions d'un établissement.
+          responses:
+            200:
+              body:
+                application/json:
+                  type: contrevenantExistant[]
+            404:
+              description: L'établissement identifié n'existe pas.

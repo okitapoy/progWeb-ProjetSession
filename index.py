@@ -175,6 +175,17 @@ def page_resulat_recherche():
 
 
 
+@app.route('/doc')
+def documentation():
+    return render_template('doc.html')
+
+
+@app.route('/testdoc')
+def documentationTest():
+    return render_template('testDoc.html')
+
+
+
 @app.route('/api/contrevenants',methods=['GET'])
 def api_contrevenants():
 
@@ -219,5 +230,48 @@ def api_contrevenants():
     else:
         print("argument non pris en charge!!!!!")
 
+
+    return("fin api")
+
+
+
+@app.route('/api/contrevenants/contrevenant/<etablissement>',methods=['GET'])
+def api_etblissement(etablissement):
+    db = get_db()
+    #liste_infractions_etablissement  = jsonify(db.chercher_etablissement(etablissement))
+
+    liste_infractions_etablissement = db.chercher_etablissement(etablissement)
+    if(len(liste_infractions_etablissement) > 0):
+        #print(liste_infractions_etablissement[0])
+        return (jsonify(liste_infractions_etablissement))
+    else:
+        print("pas trouveeeeee")
+        return render_template("404.html"),404
+
+
+
+@app.route('/api/contrevenants/liste_etablissment/<format>',methods=['GET'])
+def api_liste_etablissement(format):
+    db = get_db()
+    liste_complete = db.get_liste_complete()
+
+    liste_dict = []
+    liste_etablissement = []
+
+    for row in liste_complete:
+        if(row['etablissement'] not in liste_etablissement):
+            liste_dict.append(dict({"etablissement": row['etablissement'], "contreventions": 1}))
+        else:
+            for index, x in enumerate(liste_dict):
+                if(row['etablissement'] is x['etablissement']):
+                    #x['contreventions'] = 88889999000
+                    liste_dict[index]['contreventions'] = int(liste_dict[index]['contreventions']) + 1
+                    break
+
+        liste_etablissement.append(row['etablissement'])
+
+
+
+    print(liste_dict)
 
     return("fin api")

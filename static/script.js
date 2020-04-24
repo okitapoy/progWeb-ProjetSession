@@ -353,7 +353,8 @@ function voirEtablissement(etablissement){
   console.log("on est  dans la fonction deroulller ");
   console.log(etablissement);
 
-  var url_route = "/api/contrevenants?contrevenant="+etablissement;
+  //var url_route = "/api/contrevenants?contrevenant="+etablissement;
+  var url_route = "/api/contrevenants/contrevenant/"+etablissement;
 
 
   var xhttp = new XMLHttpRequest();
