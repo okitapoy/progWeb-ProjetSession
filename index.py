@@ -10,11 +10,13 @@ from flask import redirect
 from flask import Response
 from flask import url_for
 from flask import jsonify
+from flask import send_from_directory, send_file
 from .database import Database
 #import uuid
 import datetime
 #
 #
+import csv
 import urllib
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -23,7 +25,10 @@ import xml.etree.ElementTree as ET
 #
 #
 from apscheduler.schedulers.background import BackgroundScheduler
+from dicttoxml import dicttoxml
 import datetime
+
+#import operator
 
 #from flask_apscheduler import APScheduler
 
@@ -52,30 +57,24 @@ app = Flask(__name__)
 
 
 
-def fonction_test():
-    n = 0
-    print("threaadddddddd")
-    n += 10
+def mise_a_jour_bd():
+    get_site_data()
+    donnee_a_jours = True
+    print("Mise à jours des donnees effectuée")
+
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(fonction_test,'interval',hours=24,start_date='2020-04-20 00:00:00')
+scheduler.add_job(mise_a_jour_bd,'interval',hours=24,start_date='2020-04-20 00:00:00')
 scheduler.start()
 
 
 def get_xml_root(path):
-    #tree = ET.fromstring(path)
-    #return tree.getroot()
     return ET.fromstring(path)
 
 
 def get_site_data():
-    #print(URL)
     try:
-        #response = urlopen(req)
         response = urllib.request.urlopen(URL)
-
-        #response.decode('utf-8')
-        #data_xml = response.read()
     except HTTPError as e:
         print('The server couldn\'t fulfill the request.')
         print('Error code: ', e.code)
@@ -83,20 +82,9 @@ def get_site_data():
         print('We failed to reach a server.')
         print('Reason: ', e.reason)
     else:
-        print("c bonnnnnn")
         data_xml = str(response.read().decode('latin-1'))
-
-        #tt = str(data_xml.encode('utf-8','strict'))
-        print(data_xml)
-
         root = get_xml_root(data_xml)
-
         mettre_a_jours_bd(root,get_db())
-
-
-
-        #with open('feed.xml', 'wb') as outfile:
-            #shutil.copyfileobj(response,outfile)
 
 
 
@@ -107,6 +95,8 @@ def mettre_a_jours_bd(root,db):
         root[index][3].text,root[index][4].text,root[index][5].text,root[index][6].text,
         root[index][7].text,root[index][8].text,iso_convert(root[index][6].text),iso_convert(root[index][7].text))
         index += 1
+
+
 
 def valider_date(la_date):
     valide = 1
@@ -122,10 +112,30 @@ def iso_convert(laDate):
     liste = laDate.split()
     trait = "-"
     return liste[2]+trait+mois[liste[1]]+trait+liste[0]
-    #print(iso_date)
-    #print(valider_date(iso_date))
 
 
+
+def get_liste_complete_triee():
+    db = get_db()
+    liste_complete = db.get_liste_complete()
+    liste_dict = []
+    liste_etablissement = []
+
+    for row in liste_complete:
+        if(row['etablissement'] not in liste_etablissement):
+            nombre = len(db.chercher_etablissement(row['etablissement']))
+            liste_dict.append(dict({"etablissement": row['etablissement'], "contreventions": nombre}))
+
+        liste_etablissement.append(row['etablissement'])
+
+    liste_trie = sorted(liste_dict, key = lambda i : i['contreventions'], reverse=True)
+    return liste_trie
+
+def verifier_bd():
+    global donnee_a_jours
+    if donnee_a_jours is False:
+        get_site_data();
+        donnee_a_jours = True
 
 
 
@@ -149,12 +159,14 @@ def close_connection(exception):
 
 @app.route('/')
 def page_acceuil():
-    #get_site_data();
+    #if donnee_a_jours is False:
+    #    get_site_data();
+    #    donnee_a_jours = True
+
+    #verifier_bd()
     db = get_db()
 
     liste_complete = db.get_liste_complete()
-    #for row in list_complete:
-    #    print(row)
 
     return render_template('accueil.html',liste_contrevenants=liste_complete)
 
@@ -162,9 +174,9 @@ def page_acceuil():
 @app.route('/recherche')
 def page_resulat_recherche():
     db = get_db()
-    etablissement = request.args['etablissement']
-    proprietaire = request.args['proprietaire']
-    rue = request.args['rue']
+    etablissement = request.args['etablissement'].strip()
+    proprietaire = request.args['proprietaire'].strip()
+    rue = request.args['rue'].strip()
 
     if(rue == ""):
         resulat = db.chercher_attribut_sans_rue(etablissement,proprietaire)
@@ -178,12 +190,6 @@ def page_resulat_recherche():
 @app.route('/doc')
 def documentation():
     return render_template('doc.html')
-
-
-@app.route('/testdoc')
-def documentationTest():
-    return render_template('testDoc.html')
-
 
 
 @app.route('/api/contrevenants',methods=['GET'])
@@ -210,28 +216,31 @@ def api_contrevenants():
                 return(jsonify(liste_entre_date))
                 print("aucune infraction trouvee")
         else:
+            message = "Une erreur est survenue. Vous devez mettre des dates valident (format annee-mois-jours : 2020-02-25)"
             print("DATE INVALIDE!!!!!")
+            return render_template("404.html",msg=message),404
 
     elif len(request.args) is 0:
-        print("ZEROOOOOO   argument passe liste complete")
+        #print("ZEROOOOOO   argument passe liste complete")
+
         infractions_liste_complete = jsonify(db.get_liste_complete())
 
         return(infractions_liste_complete)
 
-    elif 'contrevenant' in request.args and len(request.args) is 1:
-        print("argument un contrevenant!!!!!")
+    #elif 'contrevenant' in request.args and len(request.args) is 1:
+        #print("argument un contrevenant!!!!!")
 
-        etablissement = str(request.args['contrevenant'])
-        liste_infractions_etablissement  = jsonify(db.chercher_etablissement(etablissement))
+        #etablissement = str(request.args['contrevenant'])
+        #liste_infractions_etablissement  = jsonify(db.chercher_etablissement(etablissement))
 
-        return (liste_infractions_etablissement)
+        #return (liste_infractions_etablissement)
 
 
     else:
+        message = "Les parametres d'URL que vous avez entrez ne sont pas valident."
         print("argument non pris en charge!!!!!")
+        return render_template("404.html",msg=message),404
 
-
-    return("fin api")
 
 
 
@@ -250,28 +259,79 @@ def api_etblissement(etablissement):
 
 
 
-@app.route('/api/contrevenants/liste_etablissment/<format>',methods=['GET'])
+@app.route('/api/contrevenants/liste/non/non',methods=['GET'])
 def api_liste_etablissement(format):
+    param = ['CSV','JSON','XML']
     db = get_db()
     liste_complete = db.get_liste_complete()
 
     liste_dict = []
     liste_etablissement = []
 
-    for row in liste_complete:
-        if(row['etablissement'] not in liste_etablissement):
-            liste_dict.append(dict({"etablissement": row['etablissement'], "contreventions": 1}))
+    if format.upper() in param:
+        for row in liste_complete:
+            if(row['etablissement'] not in liste_etablissement):
+                nombre = len(db.chercher_etablissement(row['etablissement']))
+                liste_dict.append(dict({"etablissement": row['etablissement'], "contreventions": nombre}))
+
+            liste_etablissement.append(row['etablissement'])
+
+        liste_trie = sorted(liste_dict, key = lambda i : i['contreventions'], reverse=True)
+
+        if format.upper() is 'JSON':
+            print('json')
+            return(jsonify(liste_trie))
+        elif format.upper() is 'XML':
+            print("XML")
+            return(dicttoxml(liste_trie))
         else:
-            for index, x in enumerate(liste_dict):
-                if(row['etablissement'] is x['etablissement']):
-                    #x['contreventions'] = 88889999000
-                    liste_dict[index]['contreventions'] = int(liste_dict[index]['contreventions']) + 1
-                    break
-
-        liste_etablissement.append(row['etablissement'])
+            print(format.upper())
+            return("csv incomplet")
 
 
+    else:
+        return render_template("404.html"),404
 
-    print(liste_dict)
 
-    return("fin api")
+
+
+    #print(liste_trie)
+
+    #return(jsonify(liste_trie))
+
+
+
+@app.route('/api/contrevenants/liste_etablissement/JSON',methods=['GET'])
+def api_liste_etablissement_JSON():
+    #db = get_db()
+
+    liste_trie = get_liste_complete_triee()
+    return(jsonify(liste_trie))
+
+
+@app.route('/api/contrevenants/liste_etablissement/XML',methods=['GET'])
+def api_liste_etablissement_XML():
+    #db = get_db()
+
+    liste_trie = get_liste_complete_triee()
+    return(dicttoxml(liste_trie))
+
+
+@app.route('/api/contrevenants/liste_etablissement/CSV',methods=['GET'])
+def api_liste_etablissement_CSV():
+    liste_trie = get_liste_complete_triee()
+    csv_columns = ['etablissement','contreventions']
+    csv_file = "fichier.csv"
+    try:
+        with open(csv_file, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for data in liste_trie:
+                writer.writerow(data)
+
+        with open('fichier.csv','r') as file:
+            data = file.read()
+        return (data)
+    except IOError:
+        print("I/O error")
+        return render_template("404.html"),500

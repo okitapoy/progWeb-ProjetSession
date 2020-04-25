@@ -15,7 +15,7 @@ function eraseContainer(element){
 
 
 function recherche_date(){
-console.log("ON EST DANS LA fonctions javascript");
+//console.log("ON EST DANS LA fonctions javascript");
 
   du = document.getElementById("form_date").elements[0].value;
   au = document.getElementById("form_date").elements[1].value;
@@ -40,7 +40,10 @@ console.log("ON EST DANS LA fonctions javascript");
      }
 
 
-    }
+   }else if(this.readyState == 4 && this.status == 404){
+     window.location.href = url_route;
+   }
+
   };
   xhttp.open("GET", url_route, true);
   xhttp.send();

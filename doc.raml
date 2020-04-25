@@ -17,6 +17,10 @@ types:
       date_infraction: string
       date_jugement: string
       montant: integer
+  nombreContrevention:
+    properties:
+      etablissement: string
+      contreventions: integer
 
 
 /api:
@@ -50,3 +54,31 @@ types:
                   type: contrevenantExistant[]
             404:
               description: L'établissement identifié n'existe pas.
+    /liste_etablissement:
+      /JSON:
+        get:
+          description: Retourne une liste des établissements avec leurs nombre de contreventions.
+          responses:
+            200:
+              body:
+                application/json:
+                  type: nombreContrevention[]
+    /liste_etablissement:
+      /XML:
+        get:
+          description: Retourne une liste des établissements avec leurs nombre de contreventions.
+          responses:
+            200:
+             body:
+              application/xml:
+                type: nombreContrevention[]
+    /liste_etablissement:
+      /CSV:
+        get:
+          description: Retourne une liste des établissements avec leurs nombre de contreventions.
+          responses:
+            200:
+              body:
+                text/csv:
+            500:
+              description: Un problème est survenu sur le serveur.

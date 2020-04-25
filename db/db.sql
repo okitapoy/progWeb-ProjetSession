@@ -12,8 +12,3 @@ create table contrevenants (
   date_iso_infraction text,
   date_iso_jugement text
 );
-
-
-
-insert into contrevenants (proprietaire,categorie,etablissement,adresse,ville,description,date_infraction,date_jugement,montant)
-  values("a1","c1","e1","adr1","v1","desc1","datei1","datej1",1500);
