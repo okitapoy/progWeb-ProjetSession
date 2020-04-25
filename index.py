@@ -56,7 +56,7 @@ app = Flask(__name__)
 
 
 
-
+#fonction pour mettre a jours la BD
 def mise_a_jour_bd():
     get_site_data()
     donnee_a_jours = True
@@ -67,11 +67,11 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(mise_a_jour_bd,'interval',hours=24,start_date='2020-04-20 00:00:00')
 scheduler.start()
 
-
+#fonction qui retourn la racine d'une donnee XML: path = donnee XML
 def get_xml_root(path):
     return ET.fromstring(path)
 
-
+#fonction qui recupere le XML du site de la ville
 def get_site_data():
     try:
         response = urllib.request.urlopen(URL)
@@ -87,7 +87,7 @@ def get_site_data():
         mettre_a_jours_bd(root,get_db())
 
 
-
+#fonction qui ajoute les infractions dans la BD: route = racine XML,
 def mettre_a_jours_bd(root,db):
     index = 0
     for child in root:
@@ -97,7 +97,7 @@ def mettre_a_jours_bd(root,db):
         index += 1
 
 
-
+#fonction pour valider une date (ISO 8601): la_date = la date, retourne 1 si la date est valide
 def valider_date(la_date):
     valide = 1
     try:
@@ -107,14 +107,14 @@ def valider_date(la_date):
     finally:
         return valide
 
-
+#fonction qui convertit une date en ISO 8601 : retourne la date convertit
 def iso_convert(laDate):
     liste = laDate.split()
     trait = "-"
     return liste[2]+trait+mois[liste[1]]+trait+liste[0]
 
 
-
+#retourn la liste de tous les etablissment avec leurs nombre d'infractions, la liste est triee (decroissant)
 def get_liste_complete_triee():
     db = get_db()
     liste_complete = db.get_liste_complete()
@@ -131,6 +131,7 @@ def get_liste_complete_triee():
     liste_trie = sorted(liste_dict, key = lambda i : i['contreventions'], reverse=True)
     return liste_trie
 
+#verifie si les donnes de la ville sont dans la BD
 def verifier_bd():
     global donnee_a_jours
     if donnee_a_jours is False:
@@ -159,10 +160,6 @@ def close_connection(exception):
 
 @app.route('/')
 def page_acceuil():
-    #if donnee_a_jours is False:
-    #    get_site_data();
-    #    donnee_a_jours = True
-
     #verifier_bd()
     db = get_db()
 
@@ -210,7 +207,6 @@ def api_contrevenants():
                 liste_entre_date_json = jsonify(liste_entre_date)
                 print(liste_entre_date_json)
 
-                #return render_template('rechercheRes.html',liste_contrevenants=liste_entre_date) #temporair -------
                 return(liste_entre_date_json)
             else:
                 return(jsonify(liste_entre_date))
@@ -221,20 +217,8 @@ def api_contrevenants():
             return render_template("404.html",msg=message),404
 
     elif len(request.args) is 0:
-        #print("ZEROOOOOO   argument passe liste complete")
-
         infractions_liste_complete = jsonify(db.get_liste_complete())
-
         return(infractions_liste_complete)
-
-    #elif 'contrevenant' in request.args and len(request.args) is 1:
-        #print("argument un contrevenant!!!!!")
-
-        #etablissement = str(request.args['contrevenant'])
-        #liste_infractions_etablissement  = jsonify(db.chercher_etablissement(etablissement))
-
-        #return (liste_infractions_etablissement)
-
 
     else:
         message = "Les parametres d'URL que vous avez entrez ne sont pas valident."
@@ -247,11 +231,9 @@ def api_contrevenants():
 @app.route('/api/contrevenants/contrevenant/<etablissement>',methods=['GET'])
 def api_etblissement(etablissement):
     db = get_db()
-    #liste_infractions_etablissement  = jsonify(db.chercher_etablissement(etablissement))
-
     liste_infractions_etablissement = db.chercher_etablissement(etablissement)
+
     if(len(liste_infractions_etablissement) > 0):
-        #print(liste_infractions_etablissement[0])
         return (jsonify(liste_infractions_etablissement))
     else:
         print("pas trouveeeeee")
@@ -287,23 +269,14 @@ def api_liste_etablissement(format):
         else:
             print(format.upper())
             return("csv incomplet")
-
-
     else:
         return render_template("404.html"),404
 
 
 
 
-    #print(liste_trie)
-
-    #return(jsonify(liste_trie))
-
-
-
 @app.route('/api/contrevenants/liste_etablissement/JSON',methods=['GET'])
 def api_liste_etablissement_JSON():
-    #db = get_db()
 
     liste_trie = get_liste_complete_triee()
     return(jsonify(liste_trie))

@@ -1,10 +1,10 @@
-console.log("CECIIIIIII ESTTT UN TEEESTTT");
 
-
-//document.getElementById("form_rehcherche").onsubmit = function(){recherche_date()};
+/*
+Fonction qui efface le contenu d'un balise html
+element : le id de la balise
+*/
 function eraseContainer(element){
      var myNode = document.getElementById(element);
-
 
      while (myNode.firstChild) {
        myNode.removeChild(myNode.firstChild);
@@ -13,10 +13,16 @@ function eraseContainer(element){
 }
 
 
+/*
+fonction qui fait une requete ajax pour reperer une lite de contreventions
+dans durant une periode incluse entre deux dates.
 
+si la liste retournee n'est pas vide, la fonction affiche le resulat sur la page d'page_acceuil,
+sinon, elle affiche un message "aucun resulat"
+
+si les parametres(dates) sont invalident une page d'erreur (404) est affichee
+*/
 function recherche_date(){
-//console.log("ON EST DANS LA fonctions javascript");
-
   du = document.getElementById("form_date").elements[0].value;
   au = document.getElementById("form_date").elements[1].value;
 
@@ -54,6 +60,10 @@ function recherche_date(){
 
 
 
+/*
+fonction qui debute la creation d'un table HTML.
+donnee_json : une tableau JSON de contrenventions
+*/
 function creerTable(donnee_json){
 
   var i;
@@ -62,8 +72,6 @@ function creerTable(donnee_json){
   var tablo = [];
 
   for(i = 0; i < donnee_json.length; i++){
-    //console.log(donnee_json[i].etablissement);
-
     for(n = 0; n < donnee_json.length; n++){
       if(donnee_json[i].etablissement == donnee_json[n].etablissement){
         nombre++;
@@ -72,8 +80,6 @@ function creerTable(donnee_json){
       if(!tablo.includes(donnee_json[i].etablissement)){
        ajouterALaTable(donnee_json[i].etablissement,nombre);
        tablo.push(donnee_json[i].etablissement);
-       //console.log(donnee_json[i].etablissement);
-       //console.log(nombre);
       }
       nombre = 1;
 
@@ -87,11 +93,13 @@ function creerTable(donnee_json){
 
 
 
-
+/*
+fonction qui cree un header (TH) d'un tableau HTML
+*/
 function creerHeaderTable(){
 
   eraseContainer("block_resultat");
-  //document.getElementById("block_resultat").innerHTML = donnee_json[0].etablissement;
+
   var div = document.createElement("DIV");
   div.setAttribute("id","block_resultat");
   document.body.appendChild(div);
@@ -118,29 +126,12 @@ function creerHeaderTable(){
 }
 
 
-function ajouterALaTable(etablissement,nombre){
 /*
-  var row_1 = document.createElement("TR");
-  row_1.setAttribute("id", "myTr");
-  document.getElementById("myTable").appendChild(row_1);
-
-  var th = document.createElement("TD");
-  var text = document.createTextNode(etablissement);
-  th.appendChild(text);
-  document.getElementById("myTr").appendChild(th);
-
-  var th = document.createElement("TD");
-  var text = document.createTextNode(nombre);
-  th.appendChild(text);
-  document.getElementById("myTr").appendChild(th);   */
-
-
-  //document.getElementById("myTr").appendChild(th);
-  //document.getElementById("myTr").appendChild(th);
-  //document.getElementById("myTable").appendChild(row);
-
-  //var br = document.createElement("BR");
-  //document.getElementById("myTr").appendChild(br);
+fonction qui ajoute des elements dans un tableau HTML
+etablissement : le nom de l'etablissment
+nombre :  le nombre d'infractions de l'etablissment
+*/
+function ajouterALaTable(etablissement,nombre){
 
   var table = document.getElementById("myTable");
   var row = table.insertRow(1);
@@ -153,11 +144,16 @@ function ajouterALaTable(etablissement,nombre){
 }
 
 
+/*
+lors qu'aucune donnees n'est trouvees apres une recherche par periode,
+cette fonction cree une balise P HTML pour afficher le message
 
+du :  anneee debut
+au : annee fin
+*/
 function aucune_donnee_trouve(du,au){
 
   eraseContainer("block_resultat");
-  //document.getElementById("block_resultat").innerHTML = donnee_json[0].etablissement;
   var div = document.createElement("DIV");
   div.setAttribute("id","block_resultat");
   document.body.appendChild(div);
@@ -171,10 +167,12 @@ function aucune_donnee_trouve(du,au){
 }
 
 
-
+/*
+fonction qui debut la creation d'un menu deroulant.
+Elle fait juste creer un element HTML P avec un message
+donnee_json : tableau d'une liste de JSON
+*/
 function menuDeroulant(donnee_json){
-
-  //console.log(donnee_json.length);
 
   eraseContainer("div_recherche_deroulant");
 
@@ -187,7 +185,10 @@ function menuDeroulant(donnee_json){
 
 }
 
-
+/*
+Cette fonction cree un bouton pour active le menu deroulant
+donnee_json : tableau d'une liste de JSON
+*/
 function creerBouttonDeroulant(donnee_json){
 
   var div = document.createElement("DIV");
@@ -213,7 +214,10 @@ function creerBouttonDeroulant(donnee_json){
 
 }
 
-
+/*
+Cette fonction ajoute les element dans le menu deroulant
+donnee_json : tableau d'une liste de JSON
+*/
 function ajouterDonneeAuMenu(donnee_json){
 
   var div = document.createElement("DIV");
@@ -265,7 +269,12 @@ function ajouterDonneeAuMenu(donnee_json){
 
 }
 
-
+/*
+Lorsque un element est choisi dans le menu deroulant,
+cette fonction debute l'affichage de la liste de toutes les infractions d'un element (etablissement)
+la fonction creer une table HTML et aussi le header TH de la table
+donnee_json : tableau d'une liste de JSON
+*/
 function affichierUnContrevenant(donnee_json){
 
 
@@ -309,7 +318,10 @@ function affichierUnContrevenant(donnee_json){
     insererDonneeUnContrevenant(donnee_json);
 }
 
-
+/*
+cette fonction insere des elements dans un table HTML
+donnee_json : tableau d'une liste de JSON
+*/
 function insererDonneeUnContrevenant(donnee_json){
 
   var i = 0;
@@ -351,9 +363,11 @@ function insererDonneeUnContrevenant(donnee_json){
 
 
 
-
+/*
+Requete ajax pour recuperer la liste des infranction d'un etablissment
+etablissment : le nom de l'etablissment
+*/
 function voirEtablissement(etablissement){
-  console.log("on est  dans la fonction deroulller ");
   console.log(etablissement);
 
   //var url_route = "/api/contrevenants?contrevenant="+etablissement;
@@ -384,11 +398,11 @@ function voirEtablissement(etablissement){
 
 
 
+/*
+Requete ajax pour recuperer la liste de toutes les infractions disponible.
 
+*/
 function chercherContreventionsCompletes(){
-
-    //du = document.getElementById("form_date").elements[0].value;
-    //au = document.getElementById("form_date").elements[1].value;
 
     var url_route = "/api/contrevenants";
 
