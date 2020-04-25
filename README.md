@@ -4,7 +4,7 @@ Nom : Okitapoy Koy Christian (OKIK08078702)
 
 
 
-#IMPORTANT
+# IMPORTANT
 
 pour partir le programme, un fichier makefile est fourni et la commande "make" partira le programme
 exemple pour partir le programme sur le terminal :
